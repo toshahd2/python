@@ -1,0 +1,81 @@
+from pathlib import Path
+
+p = Path('./hw4/task5/')
+fileFirst = p / 'pol1.txt'
+fileSecond = p / 'pol2.txt'
+resultFile = p / 'pol3.txt'
+
+def polynom(lst):
+    mylist = list(reversed(lst))
+    pol = ''
+    for i in range(len(mylist)):
+        if i < len(mylist) - 2:
+            pol += f'{mylist[i]}x^{len(mylist)-i-1} + '
+        elif i == len(mylist) - 2:
+            pol += f'{mylist[i]}x + '
+        elif i == len(mylist) - 1:
+            pol += f'{mylist[i]} = 0'
+    return pol
+
+def power(mylist):
+    if '^' in mylist:
+        pw = int(mylist[mylist.find('^')+1:])
+    elif ('x' in mylist) and ('^' not in mylist):
+        pw = 1
+    else:
+        pw = -1
+    return pw
+
+def kf(mylist):
+    if 'x' in mylist:
+        koef = int(mylist[:mylist.find('x')])
+    return koef
+
+def koefList(pol):
+    pol = pol[0].replace(' ', '').split('=')
+    pol = pol[0].split('+')
+    mylist = []
+    l = len(pol)
+    if power(pol[-1]) == -1:
+        mylist.append(int(pol[-1]))
+        l -= 1
+    pw = 1
+    index = l-1
+    while index >= 0:
+        if power(pol[index]) != -1 and power(pol[index]) == pw:
+            mylist.append(kf(pol[index]))
+            index -= 1
+            pw += 1
+        else:
+            mylist.append(0)
+            pw += 1
+    return mylist
+
+with open(fileFirst, 'r') as data:
+    pol1 = data.readlines()
+kf1 = koefList(pol1)
+print(f"Первый многочлен: \n{pol1}")
+
+with open(fileSecond, 'r') as data:
+    pol2 = data.readlines()
+kf2 = koefList(pol2)
+print(f"Второй многочлен: \n{pol2}")
+
+lenth = len(kf1)
+if len(kf1) > len(kf2):
+    lenth = len(kf2)
+result = [kf1[i] + kf2[i] for i in range(lenth)]
+
+if len(kf1) > len(kf2):
+    lenth2 = len(kf1)
+    for i in range(lenth,lenth2):
+        result.append(kf1[i])
+else:
+    lenth2 = len(kf2)
+    for i in range(lenth,lenth2):
+        result.append(kf2[i])
+
+with open(resultFile, 'w') as data:
+    data.write(polynom(result))
+
+print(f"Итоговый многочлен: \n{polynom(result)}")
